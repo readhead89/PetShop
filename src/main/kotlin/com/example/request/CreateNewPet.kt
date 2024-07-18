@@ -1,6 +1,6 @@
 package com.example.request
 
-data class NewPetAddInStoreRequest(
+data class CreateNewPet(
     val id: Int,
     val category: Category,
     val name: String,

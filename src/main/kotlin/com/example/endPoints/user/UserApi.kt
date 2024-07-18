@@ -1,14 +1,16 @@
 package com.example.endPoints.user
 
-import com.example.response.GetPetByID
-import retrofit2.http.GET
+import com.example.request.CreateNewUser
+import com.example.response.ShortResponse
+import retrofit2.Call
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 interface UserApi {
     /**
-     * Method implementation petstore.swagger-> GET /pet/{petId}
-     * Найти питомца по petId
+     * Method implementation petstore.swagger-> POST /user
+     * Создать нового пользователя
      */
-
-    @GET("/pet/{petId}")
-    fun getPetById(): GetPetByID
+    @POST("user")
+    fun createNewUser(@Body user: CreateNewUser): Call<ShortResponse>
 }

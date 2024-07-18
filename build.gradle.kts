@@ -30,6 +30,8 @@ val selenide = "7.3.1"
 val retrofit2Version = "2.9.0"
 val logbackClassic = "1.4.12"
 val slf4j = "1.7.32"
+val rxjava2 = "2.9.0"
+val loggingInterceptor = "4.9.3"
 
 dependencies {
     implementation(kotlin("test"))
@@ -45,9 +47,11 @@ dependencies {
     // Retrofit
     implementation("com.squareup.retrofit2:converter-gson:$retrofit2Version")
     implementation("com.squareup.retrofit2:retrofit:$retrofit2Version")
+    implementation("com.squareup.retrofit2:adapter-rxjava2:$rxjava2")
     // Logs
     implementation("ch.qos.logback:logback-classic:$logbackClassic")
     implementation("org.slf4j:slf4j-api:$slf4j")
+    implementation ("com.squareup.okhttp3:logging-interceptor:$loggingInterceptor")
 }
 
 tasks.test {

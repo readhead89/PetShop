@@ -1,12 +1,12 @@
-package com.example
+package com.example.logger
 
+import com.example.exception.ServerErrorException
 import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import okio.Buffer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.nio.charset.StandardCharsets
 
 class LoggingInterceptor : Interceptor {
 
@@ -14,30 +14,40 @@ class LoggingInterceptor : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
-        // Логирование тела запроса
 
-        val requestBody = request.body
-        val requestBodyString = requestBody?.let {
+        // Логирование тела запроса
+        val requestBodyString = request.body?.let { body ->
             val buffer = Buffer()
-            it.writeTo(buffer)
-            buffer.readString(StandardCharsets.UTF_8)
-        } ?: "No Request Body"
+            body.writeTo(buffer)
+            buffer.readUtf8()
+        } ?: "{}"
+
         logger.debug(
-            "Sending request to method: {} this URL: {}  with body: {}",
-            request.method,
-            request.url,
-            requestBodyString
+            """
+    |--> ${request.method} ${request.url}
+    |${requestBodyString}
+    |--> END ${request.method}
+    """.trimMargin()
         )
 
         val response = chain.proceed(request)
 
         // Логирование тела ответа
         val responseBody = response.body?.string() ?: "No Response Body"
+
+        if (!response.isSuccessful) {
+            val errorMessage =
+                "Method ${response.request.method} ${response.request.url} returned error response code: ${response.code} and ${responseBody}"
+            // logger.error(errorMessage)
+            throw ServerErrorException(errorMessage, response.code, responseBody)
+        }
+
         logger.debug(
-            "Received response StatusCode: {} from {} with body: {}",
-            response.code,
-            response.request.url,
-            responseBody
+            """
+            |<-- ${response.code} ${request.url}
+            |${responseBody}
+            |<-- END HTTP
+            """.trimMargin()
         )
 
         // Чтобы сохранить тело ответа для последующего использования, создаем новое тело

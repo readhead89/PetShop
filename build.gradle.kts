@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.0"
-    id("io.qameta.allure") version "2.8.1"
+    id("io.qameta.allure") version "2.9.6"
+    id("io.qameta.allure-report") version "2.9.6"
     id("org.jetbrains.kotlin.plugin.serialization") version "1.7.20"
     id("com.diffplug.spotless") version "6.0.0"
 }
@@ -25,7 +26,7 @@ buildscript {
 // Переменные для dependencies
 val junitVersion = "5.10.2"
 val junitSuitVersion = "1.10.2"
-val allureJunit5 ="2.13.9" //"2.28.0"  //"2.8.1"
+val allureJunit5 = "2.23.0" //"2.28.0"  //"2.8.1"
 val selenide = "7.3.1"
 val retrofit2Version = "2.9.0"
 val logbackClassic = "1.4.12"
@@ -40,7 +41,11 @@ dependencies {
     implementation(kotlin("test"))
     // allure
     implementation("io.qameta.allure:allure-junit5:$allureJunit5")
-    testImplementation("io.qameta.allure:allure-java-commons:2.13.9")
+    implementation("io.qameta.allure:allure-java-commons:2.13.9")
+    implementation("io.qameta.allure:allure-selenide:2.23.0")
+    implementation("io.qameta.allure:allure-testng:2.20.1")
+
+    //implementation("Deps.uiTests.test.allureJUnit")
     // junit5
     implementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     implementation("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
@@ -84,5 +89,25 @@ kotlin {
 }
 
 allure {
-    version = "2.25.0"
+    version = "2.13.9"
+}
+
+val allureConfig = allure {
+    report {
+        version.set("2.20.1")
+    }
+    adapter {
+        autoconfigure.set(true)
+        aspectjWeaver.set(true)
+        frameworks {
+            junit5 {
+                adapterVersion.set("2.20.1")
+                enabled.set(true)
+            }
+        }
+    }
+}
+
+tasks.withType<Test> {
+    allureConfig
 }

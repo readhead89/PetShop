@@ -1,10 +1,10 @@
-import com.example.allure.AllureHelper
-import com.example.allure.AllureHelper.allureStep
+import com.example.allure.AllureHelpers.allureStep
 import com.example.apiFactory.ApiFactory.petApi
 import io.qameta.allure.Step
 import org.junit.jupiter.api.Assertions as Assert
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+
 
 import org.assertj.core.api.Assertions.assertThat
 
@@ -13,40 +13,32 @@ class TestPet : TestBase() {
     @Test
     @DisplayName("Позитивный е2е тест")
     fun testAddPetAndFindCreatedPet() {
-        val pet =
-            petApi.addNewPetToTheStore(addNewPet()).execute()
+        val pet = allureStep("Создать нового питомца") {
+            petApi.addNewPetToTheStore(addNewPet()).execute().body()
+        }
 
+        val id = allureStep("Получить id созданного питомца") {
+            pet!!.id
+        }
 
-        Step("Достем атрибуты")
-        pet.body()?.let { pet ->
-            val id = pet.id
-            val name = pet.name
+        val name = allureStep("Получить имя созданного питомца") {
+            pet!!.name
+        }
 
+        allureStep("Проверяем что питомец с $id успешно находиится") {
+            petApi.findPetById(id).execute()
+        }
 
+        allureStep("Удалить созданно питомца с именем $name  и айди $id") {
+            petApi.deleteCreatedPet(id).execute()
+        }
+        allureStep("Проверяем что питомец с $id успешно находиится") {
+            petApi.findPetById(id).execute()
+        }
 
-
-            allureStep("Ищем по $id питомца") {
-                petApi.findPetById(id).execute()
-            }
-
-            allureStep("Удаляем созданного питомца с $id") {
-                petApi.deleteCreatedPet(id).execute()
-            }
-
-            allureStep("Проверяем что пришла ошибка, так как питомец по $id не найден") {
-                petApi.findPetById(id).execute()
-            }
-
-            allureStep("Проверяем, что питомец создан успешно, и найден в базе") {
-                Assert.assertEquals(name, addNewPet().name)
-                Assert.assertNotEquals(pet.id, id)
-            }
+        allureStep("Проверки") {
+            Assert.assertEquals(name, addNewPet().name)
+            Assert.assertNotEquals(pet!!.id, id)
         }
     }
 }
-
-
-
-
-
-
